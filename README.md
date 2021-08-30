@@ -1,6 +1,6 @@
 # Clean Android code class
 
-[Clean Android](https://www.udemy.com/course/write-clean-kotlin-and-android-code/) by Catalin Ghita
+[Clean Android](https://www.udemy.com/course/write-clean-kotlin-and-android-code/) course by Catalin Ghita
 
 ###Table Of Contents 
 -Refactoring, structuring to write clean,better and maintainable code.
