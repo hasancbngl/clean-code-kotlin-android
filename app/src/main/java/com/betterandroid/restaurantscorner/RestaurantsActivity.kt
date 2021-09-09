@@ -2,7 +2,6 @@ package com.betterandroid.restaurantscorner
 
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,7 +11,6 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_restaurants.*
 import java.util.*
-import kotlin.collections.ArrayList
 
 class RestaurantsActivity : AppCompatActivity() {
 
@@ -39,7 +37,7 @@ class RestaurantsActivity : AppCompatActivity() {
             //parsing, filtering, displaying
             val parsedRestaurants = parseRestaurants(response)
             val filteredRestaurants = filterRestaurants(parsedRestaurants)
-            prepareRestaurants(filteredRestaurants)
+            displayRestaurants(filteredRestaurants)
         }
     }
 
@@ -54,9 +52,9 @@ class RestaurantsActivity : AppCompatActivity() {
         )
     }
 
-    private fun prepareRestaurants(filteredRestaurants: ArrayList<Restaurant>) {
+    private fun displayRestaurants(restaurants: ArrayList<Restaurant>) {
         val displayRestaurants = arrayListOf<RestaurantDisplayItem>()
-        filteredRestaurants.forEach { restaurant ->
+        restaurants.forEach { restaurant ->
             displayRestaurants.add(
                 RestaurantDisplayItem(
                     id = restaurant.id,
@@ -87,14 +85,13 @@ class RestaurantsActivity : AppCompatActivity() {
         }
     }
 
-    private fun filterRestaurants(parsedRestaurants: ArrayList<Restaurant>): ArrayList<Restaurant> {
+    private fun filterRestaurants(restaurants: ArrayList<Restaurant>): ArrayList<Restaurant> {
         val filteredRestaurants = arrayListOf<Restaurant>()
-        for (parsedRestaurant in parsedRestaurants) {
+        for (parsedRestaurant in restaurants) {
             if (parsedRestaurant.closingHour < 6)
                 filteredRestaurants.add(parsedRestaurant)
         }
 
-        // val latitude = MockCreator.getUserLatitude()
         for (filteredRestaurant in filteredRestaurants) {
             val userLat = MockCreator.getUserLatitude()
             val userLong = MockCreator.getUserLongitude()
@@ -109,7 +106,6 @@ class RestaurantsActivity : AppCompatActivity() {
             )
             val distanceResult = distance[0] / 1000
             filteredRestaurant.distance = distanceResult.toInt()
-            Log.d("DISTANCE_LOGS", "found distance at $distanceResult")
         }
         Collections.sort(filteredRestaurants, RestaurantDistanceSorter())
         return filteredRestaurants
