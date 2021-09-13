@@ -52,23 +52,24 @@ class RestaurantsActivity : AppCompatActivity() {
         )
     }
 
-    private fun displayRestaurants(restaurants: ArrayList<Restaurant>) {
-        val displayRestaurants = arrayListOf<RestaurantDisplayItem>()
-        restaurants.forEach { restaurant ->
-            displayRestaurants.add(
-                RestaurantDisplayItem(
-                    id = restaurant.id,
-                    displayName = "Restaurant ${restaurant.name}",
-                    displayDistance = "at ${restaurant.distance} KM distance",
-                    imageUrl = restaurant.imageUrl,
-                    type = when (restaurant.type) {
-                        "EAT_IN" -> RestaurantType.EAT_IN
-                        "TAKE_AWAY" -> RestaurantType.TAKE_AWAY
-                        else -> RestaurantType.DRIVE_THROUGH
-                    }
-                )
+    private fun displayRestaurants(restaurants: List<Restaurant>) {
+        //find the restaurant where the distance is 50
+        val foundRestaurant = restaurants.find { it.distance ==50 }
+
+        val displayRestaurants = restaurants.map {
+            return@map RestaurantDisplayItem(
+                id = it.id,
+                displayName = "Restaurant ${it.name}",
+                displayDistance = "at ${it.distance} KM distance",
+                imageUrl = it.imageUrl,
+                type = when (it.type) {
+                    "EAT_IN" -> RestaurantType.EAT_IN
+                    "TAKE_AWAY" -> RestaurantType.TAKE_AWAY
+                    else -> RestaurantType.DRIVE_THROUGH
+                }
             )
         }
+
         val adapter = restaurantsAdapter
         if (adapter != null) {
             adapter.restaurants = displayRestaurants
@@ -85,30 +86,25 @@ class RestaurantsActivity : AppCompatActivity() {
         }
     }
 
-    private fun filterRestaurants(restaurants: ArrayList<Restaurant>): ArrayList<Restaurant> {
-        val filteredRestaurants = arrayListOf<Restaurant>()
-        for (parsedRestaurant in restaurants) {
-            if (parsedRestaurant.closingHour < 6)
-                filteredRestaurants.add(parsedRestaurant)
-        }
+    private fun filterRestaurants(restaurants: List<Restaurant>): List<Restaurant> {
+        return restaurants
+            .filter { it.closingHour < 6 }
+            .map { restaurant ->
+                val userLat = MockCreator.getUserLatitude()
+                val userLong = MockCreator.getUserLongitude()
+                val distance = FloatArray(2)
 
-        for (filteredRestaurant in filteredRestaurants) {
-            val userLat = MockCreator.getUserLatitude()
-            val userLong = MockCreator.getUserLongitude()
-            val distance = FloatArray(2)
-
-            Location.distanceBetween(
-                userLat,
-                userLong,
-                filteredRestaurant.location.latitude,
-                filteredRestaurant.location.longitude,
-                distance
-            )
-            val distanceResult = distance[0] / 1000
-            filteredRestaurant.distance = distanceResult.toInt()
-        }
-        Collections.sort(filteredRestaurants, RestaurantDistanceSorter())
-        return filteredRestaurants
+                Location.distanceBetween(
+                    userLat,
+                    userLong,
+                    restaurant.location.latitude,
+                    restaurant.location.longitude,
+                    distance
+                )
+                val distanceResult = distance[0] / 1000
+                restaurant.distance = distanceResult.toInt()
+                return@map restaurant
+            }.sortedBy { it.distance }
     }
 
     private fun parseRestaurants(response: RestaurantListResponse): List<Restaurant> {
