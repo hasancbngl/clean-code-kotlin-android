@@ -15,7 +15,7 @@ import java.util.*
 class RestaurantsActivity : AppCompatActivity() {
 
     private val disposable = CompositeDisposable()
-    private var restaurantsAdapter: RestaurantsAdapter? = null
+    private lateinit var restaurantsAdapter: RestaurantsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +54,7 @@ class RestaurantsActivity : AppCompatActivity() {
 
     private fun displayRestaurants(restaurants: List<Restaurant>) {
         //find the restaurant where the distance is 50
-        val foundRestaurant = restaurants.find { it.distance ==50 }
+        val foundRestaurant = restaurants.find { it.distance == 50 }
 
         val displayRestaurants = restaurants.map {
             return@map RestaurantDisplayItem(
@@ -69,21 +69,17 @@ class RestaurantsActivity : AppCompatActivity() {
                 }
             )
         }
-
-        val adapter = restaurantsAdapter
-        if (adapter != null) {
-            adapter.restaurants = displayRestaurants
-            adapter.clickListener =
-                object : RestaurantsAdapter.RestaurantClickListener {
-                    override fun onRestaurantClicked(restaurantId: Int) {
-                        Toast.makeText(
-                            this@RestaurantsActivity,
-                            "Pressed a restaurant!",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
+        restaurantsAdapter.restaurants = displayRestaurants
+        restaurantsAdapter.clickListener =
+            object : RestaurantsAdapter.RestaurantClickListener {
+                override fun onRestaurantClicked(restaurantId: Int) {
+                    Toast.makeText(
+                        this@RestaurantsActivity,
+                        "Pressed a restaurant!",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
-        }
+            }
     }
 
     private fun filterRestaurants(restaurants: List<Restaurant>): List<Restaurant> {
