@@ -14,8 +14,8 @@ import java.util.*
 
 class RestaurantsActivity : AppCompatActivity() {
 
-    private val disposable = CompositeDisposable()
     private lateinit var restaurantsAdapter: RestaurantsAdapter
+    private val restaurantClient = RestaurantsRestClient()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,23 +33,12 @@ class RestaurantsActivity : AppCompatActivity() {
     }
 
     private fun showRestaurants() {
-        getRestaurants { response ->
+        restaurantClient.getRestaurants { response ->
             //parsing, filtering, displaying
             val parsedRestaurants = parseRestaurants(response)
             val filteredRestaurants = filterRestaurants(parsedRestaurants)
             displayRestaurants(filteredRestaurants)
         }
-    }
-
-    private fun getRestaurants(completionHandler: (response: RestaurantListResponse) -> Unit) {
-        val client = RestaurantsRestClient()
-        val userId = MockCreator.getUserId()
-        disposable.add(
-            client.getRestaurants(userId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ response -> completionHandler.invoke(response) }, {})
-        )
     }
 
     private fun displayRestaurants(restaurants: List<Restaurant>) {
@@ -122,7 +111,7 @@ class RestaurantsActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        disposable.dispose()
+        restaurantClient.stopStream()
     }
 
 }
