@@ -1,4 +1,6 @@
-package com.betterandroid.restaurantscorner
+package com.betterandroid.restaurantscorner.domain.models.restaurants
+
+import com.betterandroid.restaurantscorner.R
 
 enum class RestaurantType(
     val text: String,
