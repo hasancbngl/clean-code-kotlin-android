@@ -1,15 +1,12 @@
 package com.betterandroid.restaurantscorner
 
-import android.location.Location
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.betterandroid.restaurantscorner.RestaurantParser.parseRestaurants
-import com.betterandroid.restaurantscorner.mocks.MockCreator
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
+import com.betterandroid.restaurantscorner.RestaurantRules.filterRestaurants
+import com.betterandroid.restaurantscorner.RestaurantsViewModel.getDisplayRestaurants
 import kotlinx.android.synthetic.main.activity_restaurants.*
 import java.util.*
 
@@ -46,20 +43,7 @@ class RestaurantsActivity : AppCompatActivity() {
         //find the restaurant where the distance is 50
         val foundRestaurant = restaurants.find { it.distance == 50 }
 
-        val displayRestaurants = restaurants.map {
-            return@map RestaurantDisplayItem(
-                id = it.id,
-                displayName = "Restaurant ${it.name}",
-                displayDistance = "at ${it.distance} KM distance",
-                imageUrl = it.imageUrl,
-                type = when (it.type) {
-                    "EAT_IN" -> RestaurantType.EAT_IN
-                    "TAKE_AWAY" -> RestaurantType.TAKE_AWAY
-                    else -> RestaurantType.DRIVE_THROUGH
-                }
-            )
-        }
-        restaurantsAdapter.restaurants = displayRestaurants
+        restaurantsAdapter.restaurants = getDisplayRestaurants(restaurants)
         restaurantsAdapter.clickListener =
             object : RestaurantsAdapter.RestaurantClickListener {
                 override fun onRestaurantClicked(restaurantId: Int) {
@@ -70,27 +54,6 @@ class RestaurantsActivity : AppCompatActivity() {
                     ).show()
                 }
             }
-    }
-
-    private fun filterRestaurants(restaurants: List<Restaurant>): List<Restaurant> {
-        return restaurants
-            .filter { it.closingHour < 6 }
-            .map { restaurant ->
-                val userLat = MockCreator.getUserLatitude()
-                val userLong = MockCreator.getUserLongitude()
-                val distance = FloatArray(2)
-
-                Location.distanceBetween(
-                    userLat,
-                    userLong,
-                    restaurant.location.latitude,
-                    restaurant.location.longitude,
-                    distance
-                )
-                val distanceResult = distance[0] / 1000
-                restaurant.distance = distanceResult.toInt()
-                return@map restaurant
-            }.sortedBy { it.distance }
     }
 
     override fun onDestroy() {
